@@ -21,10 +21,11 @@ func main()  {
 
 	s.SetupDatabase()
 
-	userServiceContainer := EndPoints.ServiceContainer{Service: &s}
+	serviceContainer := EndPoints.ServiceContainer{Service: &s}
 
 	wsContainer := restful.NewContainer()
-	userServiceContainer.DefineUserEndpoints(wsContainer)
+	serviceContainer.DefineUserEndpoints(wsContainer)
+	serviceContainer.DefineKwetEndpoints(wsContainer)
 
 	if useSwagger{
 		config := swagger.Config{

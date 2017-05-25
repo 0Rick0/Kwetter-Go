@@ -27,7 +27,7 @@ type Kwet struct {
 	Text string	`json:"text"`
 	Sender User	`json:"sender" gorm:"ForeignKey:SenderID"`
 	SenderID int	`json:"-"`
-	Tags []Tag 	`json:"-" gorm:"ForeignKey:KwetID"`
+	Tags []Tag 	`json:"tags2" gorm:"ForeignKey:KwetID"`
 	TagsString []string 	`json:"tags" gorm:"-"`
 	Mentions []User        `json:"mentions" gorm:"many2many:mentions"`
 	LikedBy	[]User        `json:"liked_by" gorm:"many2many:liked_by"`
@@ -46,6 +46,10 @@ func (User) SwaggerDoc() map[string]string {
 		"following":"A list of usernames that the user is following",
 		"followers":"A list of usernames that follow the user",
 	}
+}
+
+type PostKwet struct {
+	Content string `json:"content"`
 }
 
 func (Kwet) SwaggerDoc() map[string]string {

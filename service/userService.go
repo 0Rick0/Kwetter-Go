@@ -2,27 +2,7 @@ package service
 
 import (
 	"../types"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"log"
 )
-
-type Service struct {
-	Kwets []types.Kwet
-	Users map[string]types.User
-	db gorm.DB
-}
-
-func (s *Service) SetupDatabase() { //todo arguments dialect database
-	db, err := gorm.Open("sqlite3", "test.db")
-	if err != nil {
-		log.Panic("Failed to open database!")
-	}
-
-	db.AutoMigrate(&types.User{}, &types.Kwet{}, &types.Tag{}, &types.UserFollowing{})
-	s.db = *db
-}
-
 
 func (s *Service) GetUsers(count int, offset int) []types.User  {
 	var results []types.User
@@ -70,4 +50,22 @@ func (s *Service) GetUserById(id int) *types.User {
 	var user types.User
 	s.db.Where("id = ?", id).First(&user)
 	return &user
+}
+
+func (s *Service) GetFollowingByUsername(username string) *[]string {
+	var result []string
+	var followers []int
+	s.db.Model(&types.UserFollowing{}).Where("follower_id = (SELECT id FROM users WHERE username = ?)", username).
+		Pluck("following_id", &followers)
+	s.db.Model(&types.User{}).Where(followers).Pluck("username", &result)
+	return &result
+}
+
+func (s *Service) GetFollowersByUsername(username string) *[]string {
+	var result []string
+	var followers []int
+	s.db.Model(&types.UserFollowing{}).Where("following_id = (SELECT id FROM users WHERE username = ?)", username).
+		Pluck("follower_id", &followers)
+	s.db.Model(&types.User{}).Where(followers).Pluck("username", &result)
+	return &result
 }

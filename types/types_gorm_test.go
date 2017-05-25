@@ -38,6 +38,10 @@ func TestRelations(t *testing.T) {
 		t.Fatal("Text not equal")
 	}
 
+	if findKwet.Sender.Username != user2.Username {
+		t.Fatalf("Username not equal")
+	}
+
 	if len(findKwet.Mentions) != 1 {
 		t.Fatalf("%d not proper amount of mentions!", len(findKwet.Mentions))
 	}

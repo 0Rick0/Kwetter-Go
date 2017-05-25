@@ -4,12 +4,7 @@ import (
 	"log"
 	"github.com/emicklei/go-restful"
 	"../types"
-	"../service"
 )
-
-type ServiceContainer struct {
-	Service *service.Service
-}
 
 func (sc *ServiceContainer) DefineUserEndpoints(container *restful.Container)  {
 	ws := new(restful.WebService)
@@ -26,6 +21,24 @@ func (sc *ServiceContainer) DefineUserEndpoints(container *restful.Container)  {
 			PathParameter("username", "The username of the user to get").
 			DataType("string")).
 		Writes(types.User{}))
+
+	ws.Route(ws.GET("/{username}/following").
+		To(sc.getFollowing).
+		Doc("Get the users the user is following").
+		Operation("getFollowing").
+		Param(ws.
+			 PathParameter("username", "The username of the user of whom to get the followings").
+			 DataType("string")).
+		Writes([]string{}))
+
+	ws.Route(ws.GET("/{username}/followers").
+		To(sc.getFollowers).
+		Doc("Get the users that follow the user").
+		Operation("getFollowers").
+		Param(ws.
+			PathParameter("username", "The username of the user of whom to get the followers").
+			DataType("string")).
+		Writes([]string{}))
 
 	ws.Route(ws.POST("/").To(sc.createUser).
 		Doc("Create a new User").
@@ -81,7 +94,7 @@ func (sc *ServiceContainer) createUser(req *restful.Request, resp *restful.Respo
 	resp.WriteEntity(user)
 }
 
-func (sc *ServiceContainer) deleteUser(req *restful.Request, resp * restful.Response)  {
+func (sc *ServiceContainer) deleteUser(req *restful.Request, resp *restful.Response)  {
 	username := req.PathParameter("username")
 	log.Printf("Deleting user %sc", username)
 
@@ -95,4 +108,34 @@ func (sc *ServiceContainer) deleteUser(req *restful.Request, resp * restful.Resp
 		return
 	}
 	resp.WriteEntity(user)
+}
+
+func (sc *ServiceContainer) getFollowing(req *restful.Request, resp *restful.Response)  {
+	username := req.PathParameter("username")
+
+	log.Printf("Get user %s", username)
+
+	var followers *[]string = sc.Service.GetFollowingByUsername(username)
+	// check if the user is found
+	if followers == nil{
+		//if not, report an service error
+		resp.WriteErrorString(404, "User not found")
+	}else{
+		resp.WriteEntity(&followers)
+	}
+}
+
+func (sc *ServiceContainer) getFollowers(req *restful.Request, resp *restful.Response)  {
+	username := req.PathParameter("username")
+
+	log.Printf("Get user %s", username)
+
+	var followers *[]string = sc.Service.GetFollowersByUsername(username)
+	// check if the user is found
+	if followers == nil{
+		//if not, report an service error
+		resp.WriteErrorString(404, "User not found")
+	}else{
+		resp.WriteEntity(&followers)
+	}
 }

@@ -1,29 +1,36 @@
 package types
 
 type User struct {
-	Id int		`json:"id"`
-	Username string	`json:"username"`
+	Id int		`json:"id" gorm:"primary_key"`
+	Username string	`json:"username" sql:"unique"`
 	Password string	`json:"password"`
 	FullName string	`json:"full_name"`
 	Location string	`json:"location"`
 	Website  string	`json:"website"`
 	Biography string	`json:"biography"`
-	ProfilePicture string	`json:"-"`
-	Following []User	`json:"-"`
-	Followers []User	`json:"-"`
-	FollowingSerial	[]string `json:"following"`
-	FollowersSerial	[]string `json:"followers"`
-	//Kwets
-	//Likes
+}
+
+type UserFollowing struct {
+	Follower User `json:"follower" gorm:"ForeignKey:FollowerID"`
+	FollowerID int `json:"-"`
+	Following User `json:"following" gorm:"ForeignKey:FollowingID"`
+	FollowingID int `json:"-"`
+}
+
+type Tag struct {
+	KwetID int
+	Text string
 }
 
 type Kwet struct {
-	Id int		`json:"id"`
+	Id int		`json:"id" gorm:"primary_key"`
 	Text string	`json:"text"`
-	Sender User	`json:"sender"`
-	Tags []string	`json:"tags"`
-	Mentions []User        `json:"mentions"`
-	LikedBy	[]User        `json:"liked_by"`
+	Sender User	`json:"sender" gorm:"ForeignKey:SenderID"`
+	SenderID int	`json:"-"`
+	Tags []Tag 	`json:"-" gorm:"ForeignKey:KwetID"`
+	TagsString []string 	`json:"tags" gorm:"-"`
+	Mentions []User        `json:"mentions" gorm:"many2many:mentions"`
+	LikedBy	[]User        `json:"liked_by" gorm:"many2many:liked_by"`
 }
 
 func (User) SwaggerDoc() map[string]string {

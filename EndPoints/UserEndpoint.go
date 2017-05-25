@@ -41,20 +41,19 @@ func (sc *ServiceContainer) DefineUserEndpoints(container *restful.Container)  {
 
 	u := new(types.User)
 	u.Username = "Test"
-	u.Id = 5
 	u.Biography = "aapje"
 
-	sc.Service.AddUser(*u)
+	print(sc.Service.AddUser(*u))
 
 	container.Add(ws)
 }
 
-func (s *ServiceContainer) getUser(req *restful.Request, resp *restful.Response) {
+func (sc *ServiceContainer) getUser(req *restful.Request, resp *restful.Response) {
 	username := req.PathParameter("username")
 
 	log.Printf("Get user %s", username)
 
-	user := s.Service.GetUserByUsername(username)
+	user := sc.Service.GetUserByUsername(username)
 
 	// check if the user is found
 	if user == nil{
@@ -66,32 +65,32 @@ func (s *ServiceContainer) getUser(req *restful.Request, resp *restful.Response)
 	}
 }
 
-func (s *ServiceContainer) createUser(req *restful.Request, resp *restful.Response)  {
+func (sc *ServiceContainer) createUser(req *restful.Request, resp *restful.Response)  {
 	user := new(types.User)
 	err := req.ReadEntity(user)
 	if err != nil {
 		resp.WriteError(400, err)
 		return
 	}
-	if !s.Service.AddUser(*user){
+	if !sc.Service.AddUser(*user){
 		resp.WriteErrorString(400, "Username already exists")
 		return
 	}
 	//get a username with all automatic values(like id)
-	user = s.Service.GetUserByUsername(user.Username)
+	user = sc.Service.GetUserByUsername(user.Username)
 	resp.WriteEntity(user)
 }
 
-func (s *ServiceContainer) deleteUser(req *restful.Request, resp * restful.Response)  {
+func (sc *ServiceContainer) deleteUser(req *restful.Request, resp * restful.Response)  {
 	username := req.PathParameter("username")
-	log.Printf("Deleting user %s", username)
+	log.Printf("Deleting user %sc", username)
 
-	user := s.Service.GetUserByUsername(username)
+	user := sc.Service.GetUserByUsername(username)
 	if user == nil {
 		resp.WriteErrorString(404, "User not found")
 		return
 	}
-	if !s.Service.RemoveUser(*user){
+	if !sc.Service.RemoveUser(*user){
 		resp.WriteErrorString(500, "Failed to remove user")
 		return
 	}

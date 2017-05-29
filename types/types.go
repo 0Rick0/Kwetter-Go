@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type User struct {
 	Id int		`json:"id" gorm:"primary_key"`
 	Username string	`json:"username" sql:"unique"`
@@ -27,8 +29,8 @@ type Kwet struct {
 	Text string	`json:"text"`
 	Sender User	`json:"sender" gorm:"ForeignKey:SenderID"`
 	SenderID int	`json:"-"`
-	Tags []Tag 	`json:"tags2" gorm:"ForeignKey:KwetID"`
-	TagsString []string 	`json:"tags" gorm:"-"`
+	CreatedAt time.Time `json:"created_at"`
+	Tags []Tag 	`json:"tags" gorm:"ForeignKey:KwetID"`
 	Mentions []User        `json:"mentions" gorm:"many2many:mentions"`
 	LikedBy	[]User        `json:"liked_by" gorm:"many2many:liked_by"`
 }

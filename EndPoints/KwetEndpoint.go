@@ -28,6 +28,14 @@ func (sc *ServiceContainer) DefineKwetEndpoints(container *restful.Container)  {
 	 		PathParameter("username", "The username of the user").DataType("string")).
 		  Writes([]types.Kwet{}))
 
+	ws.Route(ws.GET("/offollowed/{username}").
+		 To(sc.getKwetsOfFollowed).
+		 Doc("Get all kwets of the user the user follows").
+		 Operation("getKwetsOfFollowed").
+		 Param(ws.
+			PathParameter("username", "The username of the user").DataType("string")).
+		 Writes([]types.Kwet{}))
+
 	ws.Route(ws.POST("/new/{username}").
 		 To(sc.postKwet).
 		 Doc("Post a new kwet").
@@ -48,6 +56,18 @@ func (sc *ServiceContainer) getKwetsOfUser(req *restful.Request, resp *restful.R
 		//if not, report an service error
 		resp.WriteErrorString(404, "User not found")
 	}else{
+		resp.WriteEntity(&kwets)
+	}
+}
+
+func (sc *ServiceContainer) getKwetsOfFollowed(req *restful.Request, resp *restful.Response)  {
+	username := req.PathParameter("username")
+
+	var kwets *[]types.Kwet = sc.Service.GetKwetsOfFollowed(username, 100, 0)
+
+	if kwets == nil {
+		resp.WriteErrorString(404, "User not found")
+	}else {
 		resp.WriteEntity(&kwets)
 	}
 }
@@ -79,5 +99,11 @@ func (sc *ServiceContainer) postKwet(req *restful.Request, resp *restful.Respons
 		mentions_string = make([]string, 0)
 	}
 
-	sc.Service.PostKwet(username, kwet.Content, tags_string, mentions_string)
+	postedKwet := sc.Service.PostKwet(username, kwet.Content, tags_string, mentions_string)
+
+	if postedKwet != nil {
+		resp.WriteEntity(&postedKwet)
+	}else{
+		resp.WriteErrorString(503, "Failed to post kwet")
+	}
 }

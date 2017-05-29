@@ -22,6 +22,16 @@ func (sc *ServiceContainer) DefineUserEndpoints(container *restful.Container)  {
 			DataType("string")).
 		Writes(types.User{}))
 
+	ws.Route(ws.GET("/{username}/auth").
+		To(sc.getUserAuth).
+		Doc("Get a user object, with auth").
+		Operation("getUserAuth").
+		Param(ws.
+			PathParameter("username", "The username of the user to get").
+			DataType("string")).
+		Consumes("application/x-www-form-urlencoded").
+		Writes(types.User{}))
+
 	ws.Route(ws.GET("/{username}/following").
 		To(sc.getFollowing).
 		Doc("Get the users the user is following").
@@ -62,6 +72,23 @@ func (sc *ServiceContainer) DefineUserEndpoints(container *restful.Container)  {
 }
 
 func (sc *ServiceContainer) getUser(req *restful.Request, resp *restful.Response) {
+	username := req.PathParameter("username")
+
+	log.Printf("Get user %s", username)
+
+	user := sc.Service.GetUserByUsername(username)
+
+	// check if the user is found
+	if user == nil{
+		//if not, report an service error
+		resp.WriteErrorString(404, "User not found")
+	}else{
+		// else, write the entity
+		resp.WriteEntity(&user)
+	}
+}
+
+func (sc *ServiceContainer) getUserAuth(req *restful.Request, resp *restful.Response) {
 	username := req.PathParameter("username")
 
 	log.Printf("Get user %s", username)

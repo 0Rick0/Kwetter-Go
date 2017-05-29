@@ -24,8 +24,17 @@ func main()  {
 	serviceContainer := EndPoints.ServiceContainer{Service: &s}
 
 	wsContainer := restful.NewContainer()
+
+	// Add container filter to enable CORS
+	cors := restful.CrossOriginResourceSharing{
+		AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
+		AllowedMethods: []string{"GET", "POST"},
+		AllowedDomains: []string{"localhost:4200", "localhost:8080", "localhost"},
+		CookiesAllowed: false,
+		Container:      wsContainer}
 	serviceContainer.DefineUserEndpoints(wsContainer)
 	serviceContainer.DefineKwetEndpoints(wsContainer)
+	wsContainer.Filter(cors.Filter)
 
 	if useSwagger{
 		config := swagger.Config{

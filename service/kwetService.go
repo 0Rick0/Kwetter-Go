@@ -47,3 +47,10 @@ func (s *Service) PostKwet(username string, content string, tags []string, menti
 	return kwet
 	//todo mentions
 }
+
+func (s *Service) GetTrends(count int) *[]string  {
+	var trends []string
+	s.db.Model(&types.Tag{}).Limit(count).
+		Group("text").Order("count(kwet_id) desc").Pluck("text", &trends)
+	return &trends
+}

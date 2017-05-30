@@ -41,8 +41,12 @@ func (sc *ServiceContainer) DefineKwetEndpoints(container *restful.Container)  {
 		 Doc("Post a new kwet").
 		 Operation("postKwet").
 		 Param(ws.PathParameter("username", "The username").DataType("string")).
-		 Param(ws.BodyParameter("content", "The kwet").DataType("postkwet")).
 		 Reads(&types.PostKwet{}).Writes(&types.Kwet{}))
+
+	ws.Route(ws.GET("/trends").To(sc.getTrends).
+		 Doc("Get a list of trending tags").
+		 Operation("getTrends").
+		 Writes(&[]string{}))
 
 	container.Add(ws)
 }
@@ -106,4 +110,9 @@ func (sc *ServiceContainer) postKwet(req *restful.Request, resp *restful.Respons
 	}else{
 		resp.WriteErrorString(503, "Failed to post kwet")
 	}
+}
+
+func (sc *ServiceContainer) getTrends(req *restful.Request, resp *restful.Response) {
+	trends := sc.Service.GetTrends(5)
+	resp.WriteEntity(&trends)
 }
